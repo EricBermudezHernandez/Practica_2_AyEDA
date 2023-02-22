@@ -678,54 +678,24 @@ BigInt<Base>::operator BigInt<2ULL>() {
   return resultado;
 }
 */
-// Práctica 2: Especialización clase BigInt para números binarios
+
+
+// ========= PRÁCTICA 2: ESPECIALIZACIÓN CLASE BigInt PARA NÚMEROS BINARIOS =========
 
 template <>
 class BigInt<2> {
  public:
   // ========== CONSTRUCTORES ==========
-  BigInt(long long n = 0) {
-    int resto;
-    while (n > 9) {
-      resto = n % 10;
-      n /= 10;
-      numero_.emplace_back(resto);
-  }
-      numero_.emplace_back(n);
-  }
+  BigInt(long long n = 0);
+  BigInt(std::string& numero);
+  BigInt(const char* numero);
+  BigInt(const BigInt<2>& numero);
 
-  BigInt(std::string& numero) {
-    for (int i{numero.size() - 1}; i >= 0; --i) {
-      numero_.emplace_back(numero[i] - '0');
-    }
-  }
-  BigInt(const char* numero) {
-    while (*numero != '\0') {
-      numero_.emplace_back((*numero++ - '0'));
-    }
-  }
-  BigInt(const BigInt<2>& numero) {
-    numero_ = numero.numero_;
-  }  // Constructor de copia
-
-  bool operator[](int posicion) const {  // Acceso al i-ésimo dígito
-    // Usamos la "fórmula" [(numero_.size() - 1) - posicion] para acceder a el
-    // número que queremos, esto lo hacemos así ya que el vector de bool del
-    // BigInt está dado la vuelta
-    return numero_[numero_.size() - 1];
-  }  
+  bool operator[](int posicion) const; 
   // Operadores:
-  BigInt<2>& operator=(const BigInt<2>& segundo_numero) {
-    numero_ = segundo_numero.numero_;
-    return *this;
-  }
+  BigInt<2>& operator=(const BigInt<2>& segundo_numero);
   // Inserción / Extracción
-  friend std::ostream& operator<<(std::ostream& os, const BigInt<2>& numero) {
-    for (int i{numero.numero_.size() - 1}; i >= 0; --i) {
-      os << numero.numero_[i];
-    }
-    return os;
-  }
+  friend std::ostream& operator<<(std::ostream& os, const BigInt<2>& numero);
   /*
   Se puede utilizar la de la clase BigInt normal????
   friend std::istream& operator>>(std::istream& is, BigInt<2>& numero) {
@@ -733,16 +703,118 @@ class BigInt<2> {
   }
   */
   // Operadores de comparación
-  friend bool operator==(const BigInt<2>& numero1, const BigInt<2>& numero2) {
-    return numero1.numero_ == numero2.numero_;
+  friend bool operator==(const BigInt<2>& numero1, const BigInt<2>& numero2);
+  bool operator!=(const BigInt<2>& numero1) const;
+  friend bool operator<(const BigInt<2>& numero1,
+                          const BigInt<2>& numero2);
+  friend bool operator>(const BigInt<2>& numero1, const BigInt<2>& numero2);
+  bool operator>=(const BigInt<2>&) const;
+  
+  bool operator<=(const BigInt<2>&) const;
+  /*
+  // Operadores de incremento / decremento
+  BigInt<Base>& operator++();    // Pre-incremento
+  BigInt<Base> operator++(int);  // Post-incremento
+  BigInt<Base>& operator--();    // Pre-decremento
+  BigInt<Base> operator--(int);  // Post-decremento
+  */
+  // Operadores aritméticos
+  friend BigInt<2> operator+(const BigInt<2>&, const BigInt<2>&);
+  /*
+  BigInt<Base> operator-(const BigInt<Base>& numero2) const;
+  BigInt<Base> operator-() const;
+  BigInt<Base> operator*(const BigInt<Base>& numero2) const;
+  template <size_t Bass>
+  friend BigInt<Bass> operator/(const BigInt<Bass>& numero1,
+                                const BigInt<Bass>& numero2);
+  BigInt<Base> operator%(const BigInt<Base>& numero2) const;
+  // Potencia ab
+  template <size_t Bass>
+  friend BigInt<Bass> pow(const BigInt<Bass>&, const BigInt<Bass>&);
+  */
+  // ==== CONVERSORES DE BINARIO A OTRAS BASES: ====
+  // Conversor de binario a octal:
+  operator BigInt<8>();
+  operator BigInt<10>();
+  operator BigInt<16>();
+  // PRINT BORRAR:
+  void print() {
+    for (int i{0}; i < numero_.size(); ++i) {
+      std::cout << numero_[i];
+    }
+    std::cout << std::endl;
   }
-  bool operator!=(const BigInt<2>& numero1) const {
-    return numero_ != numero1.numero_;
-  } 
+ private:
+  // tener en cuenta que en "numero_" los números se guardan al revés
+  std::vector<bool> numero_;
+};
 
-  friend bool operator>(const BigInt<2>& numero1, const BigInt<2>& numero2) {
-    std::vector<bool> aux_vector_numero1{numero1.numero_},
-      aux_vector_numero2{numero2.numero_};
+
+// =============== CONSTRUCTORES ===============
+
+BigInt<2>::BigInt(long long n) {
+  int resto;
+  while (n > 9) {
+    resto = n % 10;
+    n /= 10;
+    numero_.emplace_back(resto);
+  }
+  numero_.emplace_back(n);
+}
+
+BigInt<2>::BigInt(std::string& numero) {
+  for (int i{numero.size() - 1}; i >= 0; --i) {
+    numero_.emplace_back(numero[i] - '0');
+  }
+}
+
+BigInt<2>::BigInt(const char* numero) {
+  while (*numero != '\0') {
+    numero_.emplace_back((*numero++ - '0'));
+  }
+}
+
+BigInt<2>::BigInt(const BigInt<2>& numero) {
+    numero_ = numero.numero_;
+  }  // Constructor de copia
+
+// =============== SOBRECARGA DE OPERADOR [] ===============
+
+bool BigInt<2>::operator[](int posicion) const {  // Acceso al i-ésimo dígito
+  // Usamos la "fórmula" [(numero_.size() - 1) - posicion] para acceder a el
+  // número que queremos, esto lo hacemos así ya que el vector de bool del
+  // BigInt está dado la vuelta
+  return numero_[numero_.size() - 1];
+}
+
+// ============= SOBRECARGA DE OPERADORES DE INSERCIÓN/EXTRACCIÓN =============
+
+std::ostream& operator<<(std::ostream& os, const BigInt<2>& numero) {
+  for (int i{numero.numero_.size() - 1}; i >= 0; --i) {
+    os << numero.numero_[i];
+  }
+  return os;
+}
+
+// =============== SOBRECARGA DE OPERADOR '=' ===============
+
+BigInt<2>& BigInt<2>::operator=(const BigInt<2>& segundo_numero) {
+  numero_ = segundo_numero.numero_;
+  return *this;
+}
+
+// =============== SOBRECARGA DE OPERADORES DE COMPARACIÓN ===============
+bool operator==(const BigInt<2>& numero1, const BigInt<2>& numero2) {
+  return numero1.numero_ == numero2.numero_;
+}
+
+bool BigInt<2>::operator!=(const BigInt<2>& numero1) const {
+  return numero_ != numero1.numero_;
+}
+
+bool operator>(const BigInt<2>& numero1, const BigInt<2>& numero2) {
+  std::vector<bool> aux_vector_numero1{numero1.numero_},
+    aux_vector_numero2{numero2.numero_};
   long unsigned int i{aux_vector_numero1.size() - 1},
       j{aux_vector_numero2.size() - 1}, size_maximo{};
   // Eliminamos los posibles 0s a la izquierda que puedan haber, para poder
@@ -766,36 +838,96 @@ class BigInt<2> {
   std::reverse(aux_vector_numero1.begin(), aux_vector_numero1.end());
   std::reverse(aux_vector_numero2.begin(), aux_vector_numero2.end());
   return aux_vector_numero1 > aux_vector_numero2;
+}
+
+bool operator<(const BigInt<2>& numero1, const BigInt<2>& numero2) {
+  std::vector<bool> aux_vector_numero1{numero1.numero_},
+    aux_vector_numero2{numero2.numero_};
+  long unsigned int i{aux_vector_numero1.size() - 1},
+      j{aux_vector_numero2.size() - 1}, size_maximo{};
+  // Eliminamos los posibles 0s a la izquierda que puedan haber, para poder
+  // comparar por el tamaño de los vectores
+  while (aux_vector_numero1[i] == 0 && aux_vector_numero1.size() > 1) {
+    aux_vector_numero1.pop_back();
+    i--;
   }
-  /*
-  bool operator>=(const BigInt<Base>&) const;
-  template <size_t Bass>
-  friend bool operator<(const BigInt<Bass>& numero1,
-                        const BigInt<Bass>& numero2);
-  bool operator<=(const BigInt<Base>&) const;
-  // Operadores de incremento / decremento
-  BigInt<Base>& operator++();    // Pre-incremento
-  BigInt<Base> operator++(int);  // Post-incremento
-  BigInt<Base>& operator--();    // Pre-decremento
-  BigInt<Base> operator--(int);  // Post-decremento
-  // Operadores aritméticos
-  template <size_t Bass>
-  friend BigInt<Bass> operator+(const BigInt<Bass>&, const BigInt<Bass>&);
-  BigInt<Base> operator-(const BigInt<Base>& numero2) const;
-  BigInt<Base> operator-() const;
-  BigInt<Base> operator*(const BigInt<Base>& numero2) const;
-  template <size_t Bass>
-  friend BigInt<Bass> operator/(const BigInt<Bass>& numero1,
-                                const BigInt<Bass>& numero2);
-  BigInt<Base> operator%(const BigInt<Base>& numero2) const;
-  // Potencia ab
-  template <size_t Bass>
-  friend BigInt<Bass> pow(const BigInt<Bass>&, const BigInt<Bass>&);
-  */
-  // ==== CONVERSORES DE BINARIO A OTRAS BASES: ====
-  // Conversor de binario a octal:
-  operator BigInt<8>() {
-    BigInt<2> aux{*this};
+  while (aux_vector_numero2[j] == 0 && aux_vector_numero2.size() > 1) {
+    aux_vector_numero1.pop_back();
+    j--;
+  }
+  if (aux_vector_numero1.size() < aux_vector_numero2.size()) {
+    return true;
+  } else if (aux_vector_numero2.size() < aux_vector_numero1.size()) {
+    return false;
+  }
+  // Si hemos llegado a este punto, es que tienen el mismo tamaño, tenemos
+  // invertir los vectores por que están alrevés por el propio constructor de
+  // BigInt para después compararlos
+  std::reverse(aux_vector_numero1.begin(), aux_vector_numero1.end());
+  std::reverse(aux_vector_numero2.begin(), aux_vector_numero2.end());
+  return aux_vector_numero1 < aux_vector_numero2;
+}
+
+bool BigInt<2>::operator>=(const BigInt<2>& numero2) const {
+  std::vector<bool> aux_vector_numero1{numero_},
+    aux_vector_numero2{numero2.numero_};
+  long unsigned int i{aux_vector_numero1.size() - 1},
+      j{aux_vector_numero2.size() - 1}, size_maximo{};
+  // Eliminamos los posibles 0s a la izquierda que puedan haber, para poder
+  // comparar por el tamaño de los vectores
+  while (aux_vector_numero1[i] == 0 && aux_vector_numero1.size() > 1) {
+    aux_vector_numero1.pop_back();
+    i--;
+  }
+  while (aux_vector_numero2[j] == 0 && aux_vector_numero2.size() > 1) {
+    aux_vector_numero1.pop_back();
+    j--;
+  }
+  if (aux_vector_numero1.size() > aux_vector_numero2.size()) {
+    return true;
+  } else if (aux_vector_numero2.size() > aux_vector_numero1.size()) {
+    return false;
+  }
+  // Si hemos llegado a este punto, es que tienen el mismo tamaño, tenemos
+  // invertir los vectores por que están alrevés por el propio constructor de
+  // BigInt para después compararlos
+  std::reverse(aux_vector_numero1.begin(), aux_vector_numero1.end());
+  std::reverse(aux_vector_numero2.begin(), aux_vector_numero2.end());
+  return aux_vector_numero1 >= aux_vector_numero2;
+}
+
+bool BigInt<2>::operator<=(const BigInt<2>& numero2) const {
+  std::vector<bool> aux_vector_numero1{numero_},
+    aux_vector_numero2{numero2.numero_};
+  long unsigned int i{aux_vector_numero1.size() - 1},
+      j{aux_vector_numero2.size() - 1}, size_maximo{};
+  // Eliminamos los posibles 0s a la izquierda que puedan haber, para poder
+  // comparar por el tamaño de los vectores
+  while (aux_vector_numero1[i] == 0 && aux_vector_numero1.size() > 1) {
+    aux_vector_numero1.pop_back();
+    i--;
+  }
+  while (aux_vector_numero2[j] == 0 && aux_vector_numero2.size() > 1) {
+    aux_vector_numero1.pop_back();
+    j--;
+  }
+  if (aux_vector_numero1.size() < aux_vector_numero2.size()) {
+    return true;
+  } else if (aux_vector_numero2.size() < aux_vector_numero1.size()) {
+    return false;
+  }
+  // Si hemos llegado a este punto, es que tienen el mismo tamaño, tenemos
+  // invertir los vectores por que están alrevés por el propio constructor de
+  // BigInt para después compararlos
+  std::reverse(aux_vector_numero1.begin(), aux_vector_numero1.end());
+  std::reverse(aux_vector_numero2.begin(), aux_vector_numero2.end());
+  return aux_vector_numero1 <= aux_vector_numero2;
+}
+
+// =============== CONVERSORES DE BINARIO A OTRAS BASES ===============
+
+BigInt<2>::operator BigInt<8UL>() {
+  BigInt<2> aux{*this};
     std::string numero_convertido_aux{""};
     while (aux.numero_.size() % 3 != 0) {
       aux.numero_.emplace_back(0);
@@ -813,10 +945,10 @@ class BigInt<2> {
     std::reverse(numero_convertido_aux.begin(), numero_convertido_aux.end());
     BigInt<8> numero_convertido{numero_convertido_aux};
     return numero_convertido;
-  }
+}
 
-  operator BigInt<10>() {
-    BigInt<2> aux{*this};
+BigInt<2>::operator BigInt<10UL>() {
+  BigInt<2> aux{*this};
     std::string numero_convertido_aux{""};
     int valor_digito{0}, exponente{0};
     for (int i{0}; i < aux.numero_.size(); ++i) {
@@ -826,10 +958,10 @@ class BigInt<2> {
     std::reverse(numero_convertido_aux.begin(), numero_convertido_aux.end());
     BigInt<10> numero_convertido{valor_digito};
     return numero_convertido;
-  }
+}
 
-  operator BigInt<16>() {
-    BigInt<2> aux{*this};
+BigInt<2>::operator BigInt<16UL>() {
+  BigInt<2> aux{*this};
     std::string numero_convertido_aux{""};
     while (aux.numero_.size() % 4 != 0) {
       aux.numero_.emplace_back(0);
@@ -869,17 +1001,6 @@ class BigInt<2> {
     std::reverse(numero_convertido_aux.begin(), numero_convertido_aux.end());
     BigInt<16> numero_convertido{numero_convertido_aux};
     return numero_convertido;
-  }
-  // PRINT BORRAR:
-  void print() {
-    for (int i{0}; i < numero_.size(); ++i) {
-      std::cout << numero_[i];
-    }
-    std::cout << std::endl;
-  }
- private:
-  // tener en cuenta que en "numero_" los números se guardan al revés
-  std::vector<bool> numero_;
-};
+}
 
 #endif
