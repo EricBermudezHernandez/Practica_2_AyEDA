@@ -709,6 +709,66 @@ class BigInt<2> {
   BigInt(const BigInt<2>& numero) {
     numero_ = numero.numero_;
   }  // Constructor de copia
+
+  bool operator[](int posicion) const {  // Acceso al i-ésimo dígito
+    // Usamos la "fórmula" [(numero_.size() - 1) - posicion] para acceder a el
+    // número que queremos, esto lo hacemos así ya que el vector de bool del
+    // BigInt está dado la vuelta
+    return numero_[numero_.size() - 1];
+  }  
+  // Operadores:
+  BigInt<2>& operator=(const BigInt<2>& segundo_numero) {
+    numero_ = segundo_numero.numero_;
+    return *this;
+  }
+  // Inserción / Extracción
+  friend std::ostream& operator<<(std::ostream& os, const BigInt<2>& numero) {
+    for (int i{numero.numero_.size() - 1}; i >= 0; --i) {
+      os << numero.numero_[i];
+    }
+    return os;
+  }
+  /*
+  Se puede utilizar la de la clase BigInt normal????
+  friend std::istream& operator>>(std::istream& is, BigInt<2>& numero) {
+    std::string aux;
+  }
+  */
+  // Operadores de comparación
+  friend bool operator==(const BigInt<2>& numero1, const BigInt<2>& numero2) {
+    return numero1.numero_ == numero2.numero_;
+  }
+  bool operator!=(const BigInt<2>& numero1) const {
+    return numero_ != numero1.numero_;
+  } 
+  /*
+  template <size_t Bass>
+  friend bool operator>(const BigInt<Bass>& numero1,
+                        const BigInt<Bass>& numero2);
+  bool operator>=(const BigInt<Base>&) const;
+  template <size_t Bass>
+  friend bool operator<(const BigInt<Bass>& numero1,
+                        const BigInt<Bass>& numero2);
+  bool operator<=(const BigInt<Base>&) const;
+  // Operadores de incremento / decremento
+  BigInt<Base>& operator++();    // Pre-incremento
+  BigInt<Base> operator++(int);  // Post-incremento
+  BigInt<Base>& operator--();    // Pre-decremento
+  BigInt<Base> operator--(int);  // Post-decremento
+  // Operadores aritméticos
+  template <size_t Bass>
+  friend BigInt<Bass> operator+(const BigInt<Bass>&, const BigInt<Bass>&);
+  BigInt<Base> operator-(const BigInt<Base>& numero2) const;
+  BigInt<Base> operator-() const;
+  BigInt<Base> operator*(const BigInt<Base>& numero2) const;
+  template <size_t Bass>
+  friend BigInt<Bass> operator/(const BigInt<Bass>& numero1,
+                                const BigInt<Bass>& numero2);
+  BigInt<Base> operator%(const BigInt<Base>& numero2) const;
+  // Potencia ab
+  template <size_t Bass>
+  friend BigInt<Bass> pow(const BigInt<Bass>&, const BigInt<Bass>&);
+  */
   // ==== CONVERSORES DE BINARIO A OTRAS BASES: ====
   // Conversor de binario a octal:
   operator BigInt<8>() {
@@ -731,9 +791,62 @@ class BigInt<2> {
     BigInt<8> numero_convertido{numero_convertido_aux};
     return numero_convertido;
   }
-  operator BigInt<10>();
-  operator BigInt<16>();
 
+  operator BigInt<10>() {
+    BigInt<2> aux{*this};
+    std::string numero_convertido_aux{""};
+    int valor_digito{0}, exponente{0};
+    for (int i{0}; i < aux.numero_.size(); ++i) {
+        valor_digito += (pow(2,exponente) * aux.numero_[i]);
+        exponente++;
+    }
+    std::reverse(numero_convertido_aux.begin(), numero_convertido_aux.end());
+    BigInt<10> numero_convertido{valor_digito};
+    return numero_convertido;
+  }
+
+  operator BigInt<16>() {
+    BigInt<2> aux{*this};
+    std::string numero_convertido_aux{""};
+    while (aux.numero_.size() % 4 != 0) {
+      aux.numero_.emplace_back(0);
+    }
+    int valor_digito{0}, exponente{0};
+    for (int i{0}; i < aux.numero_.size(); ++i) {
+        valor_digito += (pow(2,exponente) * aux.numero_[i]);
+        exponente++;
+      if (exponente == 4) {
+        switch (valor_digito) {
+          case 10:
+            numero_convertido_aux.push_back('A');
+          break;
+          case 11:
+            numero_convertido_aux.push_back('B');
+          break;
+          case 12:
+            numero_convertido_aux.push_back('C');
+          break;
+          case 13:
+            numero_convertido_aux.push_back('D');
+          break;
+          case 14:
+            numero_convertido_aux.push_back('E');
+          break;
+          case 15:
+            numero_convertido_aux.push_back('F');
+          break;
+          default:
+            numero_convertido_aux += std::to_string(valor_digito);
+          break;
+        }
+        valor_digito = 0;
+        exponente = 0;
+      }
+    }
+    std::reverse(numero_convertido_aux.begin(), numero_convertido_aux.end());
+    BigInt<16> numero_convertido{numero_convertido_aux};
+    return numero_convertido;
+  }
   // PRINT BORRAR:
   void print() {
     for (int i{0}; i < numero_.size(); ++i) {
