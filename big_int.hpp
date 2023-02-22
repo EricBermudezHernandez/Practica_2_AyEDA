@@ -284,13 +284,11 @@ bool operator>(const BigInt<Base>& numero1, const BigInt<Base>& numero2) {
       j{aux_vector_numero2.size() - 1}, size_maximo{};
   // Eliminamos los posibles 0s a la izquierda que puedan haber, para poder
   // comparar por el tamaño de los vectores
-  while (static_cast<char>(aux_vector_numero1[i] + '0') == '0' &&
-         aux_vector_numero1.size() > 1) {
+  while (static_cast<char>(aux_vector_numero1[i] + '0') == '0' && aux_vector_numero1.size() > 1) {
     aux_vector_numero1.pop_back();
     i--;
   }
-  while (static_cast<char>(aux_vector_numero2[j] + '0') == '0' &&
-         aux_vector_numero2.size() > 1) {
+  while (static_cast<char>(aux_vector_numero2[j] + '0') == '0' && aux_vector_numero2.size() > 1) {
     aux_vector_numero1.pop_back();
     j--;
   }
@@ -741,10 +739,35 @@ class BigInt<2> {
   bool operator!=(const BigInt<2>& numero1) const {
     return numero_ != numero1.numero_;
   } 
+
+  friend bool operator>(const BigInt<2>& numero1, const BigInt<2>& numero2) {
+    std::vector<bool> aux_vector_numero1{numero1.numero_},
+      aux_vector_numero2{numero2.numero_};
+  long unsigned int i{aux_vector_numero1.size() - 1},
+      j{aux_vector_numero2.size() - 1}, size_maximo{};
+  // Eliminamos los posibles 0s a la izquierda que puedan haber, para poder
+  // comparar por el tamaño de los vectores
+  while (aux_vector_numero1[i] == 0 && aux_vector_numero1.size() > 1) {
+    aux_vector_numero1.pop_back();
+    i--;
+  }
+  while (aux_vector_numero2[j] == 0 && aux_vector_numero2.size() > 1) {
+    aux_vector_numero1.pop_back();
+    j--;
+  }
+  if (aux_vector_numero1.size() > aux_vector_numero2.size()) {
+    return true;
+  } else if (aux_vector_numero2.size() > aux_vector_numero1.size()) {
+    return false;
+  }
+  // Si hemos llegado a este punto, es que tienen el mismo tamaño, tenemos
+  // invertir los vectores por que están alrevés por el propio constructor de
+  // BigInt para después compararlos
+  std::reverse(aux_vector_numero1.begin(), aux_vector_numero1.end());
+  std::reverse(aux_vector_numero2.begin(), aux_vector_numero2.end());
+  return aux_vector_numero1 > aux_vector_numero2;
+  }
   /*
-  template <size_t Bass>
-  friend bool operator>(const BigInt<Bass>& numero1,
-                        const BigInt<Bass>& numero2);
   bool operator>=(const BigInt<Base>&) const;
   template <size_t Bass>
   friend bool operator<(const BigInt<Bass>& numero1,
