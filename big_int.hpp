@@ -707,6 +707,26 @@ BigInt<Base>::operator BigInt<U>() {
 // ====== PRÁCTICA 2: ESPECIALIZACIÓN CLASE BigInt PARA NÚMEROS BINARIOS ======
 // Para esta entrega se tiene en cuenta que todo número que nos pasen va a estar en complemento a 2
 
+// Función para complementar a 2 el vetor de bool:
+
+std::vector<bool>& C2(std::vector<bool>& numero_) {
+  // Se hace la operación NEG de izquierda a derecha por que el número está guardado alrevés
+  bool primer_uno_encontrado{false}; // variable que nos sirve para decir que el primer 1 ha sido encontrado y hacer NOT de los demás bits
+  for (int i{0}; i < numero_.size(); ++i) {
+    if (primer_uno_encontrado) {
+      if (numero_[i] == 0) {
+        numero_[i] = 1;
+      } else {
+        numero_[i] = 0;
+      }
+    }
+    if (numero_[i] == 1) {
+      primer_uno_encontrado = true;
+    }
+  }
+  return numero_;
+}
+
 template <>
 class BigInt<2> {
  public:
