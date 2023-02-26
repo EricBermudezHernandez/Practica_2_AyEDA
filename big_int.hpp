@@ -81,6 +81,9 @@ class BigInt {
       aux_numero /= U;
     }
     residuos.push_back(static_cast<char>(aux_numero + '0'));
+    if (aux.sign() == 1 && U == 2) {
+      residuos.push_back(static_cast<char>(0 + '0'));
+    }
     std::reverse(residuos.begin(), residuos.end());
     BigInt<U> resultado{residuos};
     return resultado;
@@ -906,7 +909,11 @@ BigInt<2> operator+(const BigInt<2>& numero1, const BigInt<2>& numero2) {
   // positivos mirando si el primer bit de signo de los dos números es '0
   if (aux_numero1.sign() == 0 && aux_numero2.sign() == 0 ||
       (aux_numero1.numero_.size() == 1 && aux_numero2.numero_.size() == 1)) {
-    result.numero_.push_back(carry);
+      result.numero_.push_back(carry);
+      // Al estar los números en C2, si un número empieza en 1 es que es negativo, 
+      // pudiendo dar error al convertirse en otra base, ya que se tomaría como un número negativo
+      // Por lo que, añadimos un 0 que no cambia el valor de el número y lo "vuelve postivo"
+      result.numero_.push_back(0); 
   }
 
   // Al final de cada operación se añade un 0 adicional al resultado de la suma,
