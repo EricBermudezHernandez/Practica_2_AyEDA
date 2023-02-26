@@ -316,10 +316,10 @@ bool operator>(const BigInt<Base>& numero1, const BigInt<Base>& numero2) {
     aux_vector_numero1.pop_back();
     j--;
   }
-  if (aux_vector_numero1.size() > aux_vector_numero2.size() &&
+  if (aux_vector_numero1.size() > aux_vector_numero2.size() ||
       (numero1.sign() == 1 && numero2.sign() == -1)) {
     return true;
-  } else if (aux_vector_numero2.size() > aux_vector_numero1.size() &&
+  } else if (aux_vector_numero2.size() > aux_vector_numero1.size() ||
              (numero1.sign() == -1 && numero2.sign() == 1)) {
     return false;
   }
@@ -350,10 +350,10 @@ bool operator<(const BigInt<Bass>& numero1, const BigInt<Bass>& numero2) {
     j--;
   }
 
-  if (aux_vector_numero1.size() < aux_vector_numero2.size() &&
+  if (aux_vector_numero1.size() < aux_vector_numero2.size() ||
       (numero1.sign() == -1 && numero2.sign() == 1)) {
     return true;
-  } else if (aux_vector_numero2.size() < aux_vector_numero1.size() &&
+  } else if (aux_vector_numero2.size() < aux_vector_numero1.size() ||
              (numero1.sign() == 1 && numero2.sign() == -1)) {
     return false;
   }
@@ -389,10 +389,10 @@ bool BigInt<Base>::operator>=(const BigInt<Base>& numero2) const {
     j--;
   }
 
-  if (aux_vector_numero1.size() > aux_vector_numero2.size() &&
+  if (aux_vector_numero1.size() > aux_vector_numero2.size() ||
       (signo_ == 1 && numero2.sign() == -1)) {
     return true;
-  } else if (aux_vector_numero2.size() > aux_vector_numero1.size() &&
+  } else if (aux_vector_numero2.size() > aux_vector_numero1.size() ||
              (signo_ == -1 && numero2.sign() == 1)) {
     return false;
   }
@@ -422,10 +422,10 @@ bool BigInt<Base>::operator<=(const BigInt<Base>& numero2) const {
     aux_vector_numero1.pop_back();
     j--;
   }
-  if (aux_vector_numero1.size() < aux_vector_numero2.size() &&
+  if (aux_vector_numero1.size() < aux_vector_numero2.size() ||
       (signo_ == -1 && numero2.sign() == 1)) {
     return true;
-  } else if (aux_vector_numero2.size() < aux_vector_numero1.size() &&
+  } else if (aux_vector_numero2.size() < aux_vector_numero1.size() ||
              (signo_ == 1 && numero2.sign() == -1)) {
     return false;
   }
@@ -677,33 +677,6 @@ BigInt<Base> BigInt<Base>::operator--(int) {  // Post-decremento
   return aux;
 }
 
-// Operador para pasar de cualquier base a cualquier base
-/*
-template <size_t Base, size_t U>
-BigInt<Base>::operator BigInt<U>() {
-  std::string numero, residuos;
-  BigInt<Base> aux{*this};
-  for (int i{aux.numero_.size() - 1}; i >= 0; --i) {
-    if (aux.numero_[i] >= 10) {
-      numero.push_back(static_cast<char>('A' + numero_[i] - 10));
-    } else {
-      numero.push_back((static_cast<char>(numero_[i] + '0')));
-    }
-  }
-  long long aux_numero{std::stoll(numero)};
-  int resto;
-  while (aux_numero >= 2) {
-    resto = aux_numero % 2;
-    residuos.push_back(static_cast<char>(resto + '0'));
-    aux_numero /= 2;
-  }
-  residuos.push_back(static_cast<char>(aux_numero + '0'));
-  std::reverse(residuos.begin(), residuos.end());
-  BigInt<2> resultado{residuos};
-  return resultado;
-}
-*/
-
 // ====== PRÁCTICA 2: ESPECIALIZACIÓN CLASE BigInt PARA NÚMEROS BINARIOS ======
 // Para esta entrega se tiene en cuenta que todo número que nos pasen va a estar
 // en complemento a 2
@@ -746,11 +719,10 @@ class BigInt<2> {
   // Operador de cambio de signo
   BigInt<2> operator-() const;
   BigInt<2> operator*(const BigInt<2>& numero2) const;
+  friend BigInt<2> operator/(const BigInt<2>& numero1,
+                                const BigInt<2>& numero2);
+  BigInt<2> operator%(const BigInt<2>& numero2) const;
   /*
-  template <size_t Bass>
-  friend BigInt<Bass> operator/(const BigInt<Bass>& numero1,
-                                const BigInt<Bass>& numero2);
-  BigInt<Base> operator%(const BigInt<Base>& numero2) const;
   // Potencia ab
   template <size_t Bass>
   friend BigInt<Bass> pow(const BigInt<Bass>&, const BigInt<Bass>&);
@@ -1001,6 +973,66 @@ BigInt<2> BigInt<2>::operator*(const BigInt<2>& numero2) const {
     iterador++;
   }
   return resultado;
+}
+
+// División
+BigInt<2> operator/(const BigInt<2>& numero1, const BigInt<2>& divisor) {
+  // Si se cumplen las siguientes dos condiciones, el divisor, que en este caso
+  // es "numero2", es 0. Una división por 0 no es posible, por lo que lo
+  // indicamos y salimos del programa
+  if (divisor.numero_.size() == 1 && divisor.numero_[0] == 0) {
+    std::cout << "No es posible realizar una división por 0" << std::endl;
+    exit(1);
+  }
+
+  // Verificar si el dividendo(numero1) es menor que el divisor(numero2), si
+  // esto es así, el cociente de la división dará 0, por lo que retornamos un
+  // BigInt con valor 0.
+  if (numero1 < divisor) {
+    std::cout << "Entró\n";
+    return BigInt<2>{};
+  }
+
+  // realizar la división
+  BigInt<2> dividendo{numero1},
+      resultado{};  // Contador que después de hacer restas consecutivas, será
+                    // el resultado de la división
+  while (dividendo >= divisor) {
+    dividendo = dividendo - divisor;
+    resultado++;
+  }
+  return resultado;
+}
+
+// Modulo
+BigInt<2> BigInt<2>::operator%(const BigInt<2>& numero2) const {
+  // Si se cumplen las siguientes dos condiciones, el divisor, que en este
+  // caso es "numero2", es 0. Una división por 0 no es posible, por lo que lo
+  // indicamos y salimos del programa
+  if (numero2.numero_.size() == 1 && numero2.numero_[0] == 0) {
+    std::cout << "No es posible realizar una división por 0" << std::endl;
+    exit(1);
+  }
+
+  // Verificar si el dividendo(numero1) es menor que el divisor(numero2), si
+  // esto es así, el cociente de la división dará 0, por lo que retornamos un
+  // BigInt con valor 0.
+  if (*this < numero2) {
+    return BigInt<2>{};
+  }
+
+  // realizar la división
+  BigInt<2> resta{*this},
+      resultado{};  // Contador que después de hacer restas consecutivas, será
+                    // el resultado de la división
+  while (resta >= numero2) {
+    resta = resta - numero2;
+    resultado++;
+  }
+
+  // Quitamos el 0 sobrante
+  resta.numero_.pop_back();
+  return resta;
 }
 // =============== OPERADORES DE INCREMENTO / DECREMENTO ===============
 BigInt<2>& BigInt<2>::operator++() {  // Pre-incremento
