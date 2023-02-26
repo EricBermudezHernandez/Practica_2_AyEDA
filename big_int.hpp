@@ -722,11 +722,8 @@ class BigInt<2> {
   friend BigInt<2> operator/(const BigInt<2>& numero1,
                                 const BigInt<2>& numero2);
   BigInt<2> operator%(const BigInt<2>& numero2) const;
-  /*
   // Potencia ab
-  template <size_t Bass>
-  friend BigInt<Bass> pow(const BigInt<Bass>&, const BigInt<Bass>&);
-  */
+  friend BigInt<2> pow(const BigInt<2>&, const BigInt<2>&);
   // ==== CONVERSORES DE BINARIO A OTRAS BASES: ====
   // Conversor de binario a octal:
   operator BigInt<8>();
@@ -1034,6 +1031,18 @@ BigInt<2> BigInt<2>::operator%(const BigInt<2>& numero2) const {
   resta.numero_.pop_back();
   return resta;
 }
+
+// Potencia
+BigInt<2> pow(const BigInt<2>& base, const BigInt<2>& exponente) {
+  BigInt<2> resultado{1}, contador{};
+  while (contador < exponente) {
+    resultado = resultado * base;  // vamos haciendo la potencia multiplicando
+                                   // el número por si mismo iterativamente
+    contador++;
+  }
+  return resultado;
+}
+
 // =============== OPERADORES DE INCREMENTO / DECREMENTO ===============
 BigInt<2>& BigInt<2>::operator++() {  // Pre-incremento
   BigInt<2> aux{1};
