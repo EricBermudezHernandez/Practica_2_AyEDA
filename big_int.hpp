@@ -705,27 +705,10 @@ BigInt<Base>::operator BigInt<U>() {
 */
 
 // ====== PRÁCTICA 2: ESPECIALIZACIÓN CLASE BigInt PARA NÚMEROS BINARIOS ======
-// Para esta entrega se tiene en cuenta que todo número que nos pasen va a estar en complemento a 2
+// Para esta entrega se tiene en cuenta que todo número que nos pasen va a estar
+// en complemento a 2
 
 // Función para complementar a 2 el vetor de bool:
-
-std::vector<bool>& C2(std::vector<bool>& numero_) {
-  // Se hace la operación NEG de izquierda a derecha por que el número está guardado alrevés
-  bool primer_uno_encontrado{false}; // variable que nos sirve para decir que el primer 1 ha sido encontrado y hacer NOT de los demás bits
-  for (int i{0}; i < numero_.size(); ++i) {
-    if (primer_uno_encontrado) {
-      if (numero_[i] == 0) {
-        numero_[i] = 1;
-      } else {
-        numero_[i] = 0;
-      }
-    }
-    if (numero_[i] == 1) {
-      primer_uno_encontrado = true;
-    }
-  }
-  return numero_;
-}
 
 template <>
 class BigInt<2> {
@@ -735,6 +718,8 @@ class BigInt<2> {
   BigInt(std::string& numero);
   BigInt(const char* numero);
   BigInt(const BigInt<2>& numero);
+  // Método para complementar a 2 un BigInt
+  BigInt<2>& C2();
   // Acceso
   int sign() const;
   bool operator[](int posicion) const;
@@ -753,16 +738,15 @@ class BigInt<2> {
   // Operadores de incremento / decremento
   BigInt<2>& operator++();    // Pre-incremento
   BigInt<2> operator++(int);  // Post-incremento
-  /*
-  BigInt<Base>& operator--();    // Pre-decremento
-  BigInt<Base> operator--(int);  // Post-decremento
-  */
+  BigInt<2>& operator--();    // Pre-decremento
+  BigInt<2> operator--(int);  // Post-decremento
   // Operadores aritméticos
   friend BigInt<2> operator+(const BigInt<2>&, const BigInt<2>&);
+  BigInt<2> operator-(const BigInt<2>& numero2) const;
+  // Operador de cambio de signo
+  BigInt<2> operator-() const;
+  BigInt<2> operator*(const BigInt<2>& numero2) const;
   /*
-  BigInt<Base> operator-(const BigInt<Base>& numero2) const;
-  BigInt<Base> operator-() const;
-  BigInt<Base> operator*(const BigInt<Base>& numero2) const;
   template <size_t Bass>
   friend BigInt<Bass> operator/(const BigInt<Bass>& numero1,
                                 const BigInt<Bass>& numero2);
@@ -776,7 +760,7 @@ class BigInt<2> {
   operator BigInt<8>();
   operator BigInt<10>();
   operator BigInt<16>();
-  
+
  private:
   // tener en cuenta que en "numero_" los números se guardan al revés
   std::vector<bool> numero_;
@@ -812,6 +796,28 @@ BigInt<2>::BigInt(const BigInt<2>& numero) {
   numero_ = numero.numero_;
 }  // Constructor de copia
 
+// Complemento a 2 para realizar ciertas operaciones de manera más visual
+BigInt<2>& BigInt<2>::C2() {
+  // Se hace la operación NEG de izquierda a derecha por que el número está
+  // guardado alrevés
+  bool primer_uno_encontrado{
+      false};  // variable que nos sirve para decir que el primer 1 ha sido
+               // encontrado y hacer NOT de los demás bits
+  for (int i{0}; i < numero_.size(); ++i) {
+    if (primer_uno_encontrado) {
+      if (numero_[i] == 0) {
+        numero_[i] = 1;
+      } else {
+        numero_[i] = 0;
+      }
+    }
+    if (numero_[i] == 1) {
+      primer_uno_encontrado = true;
+    }
+  }
+  return *this;
+}
+
 // =============== SOBRECARGA DE OPERADOR [] y getter signo ===============
 
 bool BigInt<2>::operator[](int posicion) const {  // Acceso al i-ésimo dígito
@@ -824,7 +830,7 @@ bool BigInt<2>::operator[](int posicion) const {  // Acceso al i-ésimo dígito
 int BigInt<2>::sign() const {
   // Si hay un 1 en la primera posición devolvemos un 1, si no es un 1 es
   // positivo y por lo tanto devolvemos un 0
-  if (numero_[0] == 1) {
+  if (numero_[numero_.size() - 1] == 1) {
     return 1;
   }
   return 0;
@@ -867,25 +873,37 @@ bool BigInt<2>::operator!=(const BigInt<2>& numero1) const {
 
 bool operator>(const BigInt<2>& numero1, const BigInt<2>& numero2) {
   BigInt<2> aux_numero1{numero1}, aux_numero2{numero2};
-  BigInt<10> aux_numero1_decimal{aux_numero1}, aux_numero2_decimal{aux_numero2}; // Usamos dos BigInt<10> auxiliares para comprobar si uno es mayor que el otro
+  BigInt<10> aux_numero1_decimal{aux_numero1},
+      aux_numero2_decimal{
+          aux_numero2};  // Usamos dos BigInt<10> auxiliares para comprobar si
+                         // uno es mayor que el otro
   return aux_numero1_decimal > aux_numero2_decimal;
 }
 
 bool operator<(const BigInt<2>& numero1, const BigInt<2>& numero2) {
   BigInt<2> aux_numero1{numero1}, aux_numero2{numero2};
-  BigInt<10> aux_numero1_decimal{aux_numero1}, aux_numero2_decimal{aux_numero2}; // Usamos dos BigInt<10> auxiliares para comprobar si uno es menor que el otro
+  BigInt<10> aux_numero1_decimal{aux_numero1},
+      aux_numero2_decimal{
+          aux_numero2};  // Usamos dos BigInt<10> auxiliares para comprobar si
+                         // uno es menor que el otro
   return aux_numero1_decimal < aux_numero2_decimal;
 }
 
 bool BigInt<2>::operator>=(const BigInt<2>& numero2) const {
   BigInt<2> aux_numero1{*this}, aux_numero2{numero2};
-  BigInt<10> aux_numero1_decimal{aux_numero1}, aux_numero2_decimal{aux_numero2}; // Usamos dos BigInt<10> auxiliares para comprobar si uno es mayor o igual que el otro
+  BigInt<10> aux_numero1_decimal{aux_numero1},
+      aux_numero2_decimal{
+          aux_numero2};  // Usamos dos BigInt<10> auxiliares para comprobar si
+                         // uno es mayor o igual que el otro
   return aux_numero1_decimal >= aux_numero2_decimal;
 }
 
 bool BigInt<2>::operator<=(const BigInt<2>& numero2) const {
   BigInt<2> aux_numero1{*this}, aux_numero2{numero2};
-  BigInt<10> aux_numero1_decimal{aux_numero1}, aux_numero2_decimal{aux_numero2}; // Usamos dos BigInt<10> auxiliares para comprobar si uno es menor o igual que el otro
+  BigInt<10> aux_numero1_decimal{aux_numero1},
+      aux_numero2_decimal{
+          aux_numero2};  // Usamos dos BigInt<10> auxiliares para comprobar si
+                         // uno es menor o igual que el otro
   return aux_numero1_decimal <= aux_numero2_decimal;
 }
 
@@ -917,7 +935,8 @@ BigInt<2> operator+(const BigInt<2>& numero1, const BigInt<2>& numero2) {
   // añadimos al final, pero si los dos números son positivos entonces si se
   // tiene que añadir el carry, por lo que comprobamos si los dos números son
   // positivos mirando si el primer bit de signo de los dos números es '0
-  if (aux_numero1.numero_[0] == 0 && aux_numero2.numero_[0] == 0) {
+  if (aux_numero1.sign() == 0 && aux_numero2.sign() == 0 ||
+      (aux_numero1.numero_.size() == 1 && aux_numero2.numero_.size() == 1)) {
     result.numero_.push_back(carry);
   }
 
@@ -930,18 +949,84 @@ BigInt<2> operator+(const BigInt<2>& numero1, const BigInt<2>& numero2) {
   return result;
 }
 
+BigInt<2> BigInt<2>::operator-(const BigInt<2>& numero2) const {
+  int carry = 0;
+  BigInt<2> aux_numero1{*this}, aux_numero2{numero2}, result;
+
+  // Rellenando el número más corto con 0s
+  int diferencia = aux_numero1.numero_.size() - aux_numero2.numero_.size();
+  if (diferencia < 0) {  // numero2 es el menor de los dos
+    for (int i = 0; i < -diferencia; i++) {
+      aux_numero1.numero_.push_back(0);
+    }
+  } else if (diferencia > 0) {  // numero1 es el menor de los dos
+    for (int i = 0; i < diferencia; i++) {
+      aux_numero2.numero_.push_back(0);
+    }
+  }
+  // Si el número es negativo, se va a convertir en una suma, ej: 34 - (-23) =
+  // 34 + 23 Complementamos a 2 para transformar el número en positivo y hacer
+  // una suma Si no es negativo, es positivo por lo que hacemos una suma
+  // negativa ej: 3 + (-4)
+  aux_numero2.C2();
+  // Restando los números
+  result = aux_numero1 + aux_numero2;
+  // Si los dos números son positivos en una suma binaria, se añade el bit de
+  // carry, pero en una resta siempre se quita, por lo que comprobamos si los
+  // dos números son positivos para quitarles el carry
+  if (aux_numero1.sign() == 0 && aux_numero2.sign() == 0) {
+    result.numero_.pop_back();
+  }
+
+  return result;
+}
+
+// Operador cambio de signo
+BigInt<2> BigInt<2>::operator-() const {
+  // Para cambiar un número binario de signo, se hace el C2. Por lo que
+  // simplemente usamos el método que ya tenemos y devolvemos el número
+  BigInt<2> aux{*this};
+  return aux.C2();
+}
+
+// Multiplicación
+BigInt<2> BigInt<2>::operator*(const BigInt<2>& numero2) const {
+  // Primero comprobamos si se va a multiplicar el número por 0, para en ese caso, devolver un 0
+  BigInt<2> aux{"0"}, multiplicando{*this}, resultado, iterador;
+  if (numero2 == aux) {
+    return aux;
+  }
+  while (iterador < numero2) {
+    resultado = resultado + multiplicando;
+    iterador++;
+  }
+  return resultado;
+}
 // =============== OPERADORES DE INCREMENTO / DECREMENTO ===============
-BigInt<2>& BigInt<2>::operator++() { // Pre-incremento
+BigInt<2>& BigInt<2>::operator++() {  // Pre-incremento
   BigInt<2> aux{1};
   *this = *this + aux;
   return *this;
-}    
-BigInt<2> BigInt<2>::operator++(int) { // Post-incremento
+}
+BigInt<2> BigInt<2>::operator++(int) {  // Post-incremento
   BigInt<2> aux{1}, copia{*this};
   *this = *this + aux;
-  return copia; // devolvemos la copia del número antes de ser incrementado e incrementamos antes el original
-  
-}  
+  return copia;  // devolvemos la copia del número antes de ser incrementado e
+                 // incrementamos antes el original
+}
+
+BigInt<2>& BigInt<2>::operator--() {  // Pre-decremento
+  BigInt<2> aux{1};
+  *this = *this - aux;
+  return *this;
+}
+
+BigInt<2> BigInt<2>::operator--(int) {  // Post-decremento
+  BigInt<2> aux{1}, copia{*this};
+  *this = *this - aux;
+  return copia;  // devolvemos la copia del número antes de ser incrementado e
+                 // incrementamos antes el original
+}
 
 // =============== CONVERSORES DE BINARIO A OTRAS BASES ===============
 
@@ -955,13 +1040,17 @@ BigInt<2>::operator BigInt<8UL>() {
   for (int i{0}; i < aux.numero_.size(); ++i) {
     valor_digito += (pow(2, exponente) * aux.numero_[i]);
     exponente++;
-    if (exponente == 3) { // Para pasar a octal se agrupa de 3 en 3 los bits y se resetea el exponente
+    if (exponente == 3) {  // Para pasar a octal se agrupa de 3 en 3 los bits y
+                           // se resetea el exponente
       numero_convertido_aux += (std::to_string(valor_digito));
       valor_digito = 0;
       exponente = 0;
     }
   }
-  std::reverse(numero_convertido_aux.begin(), numero_convertido_aux.end()); // Le damos la vuelta al string para que se guarde al revés en el vector de bool
+  std::reverse(
+      numero_convertido_aux.begin(),
+      numero_convertido_aux.end());  // Le damos la vuelta al string para que se
+                                     // guarde al revés en el vector de bool
   BigInt<8> numero_convertido{numero_convertido_aux};
   return numero_convertido;
 }
@@ -973,7 +1062,8 @@ BigInt<2>::operator BigInt<10UL>() {
     if (i < aux.numero_.size() - 1) {
       valor_digito += (pow(2, exponente) * aux.numero_[i]);
       exponente++;
-    } else { // Cómo los números están en complemento a 2, para pasarlos a decimal se resta la última potencia de 2
+    } else {  // Cómo los números están en complemento a 2, para pasarlos a
+              // decimal se resta la última potencia de 2
       valor_digito -= (pow(2, exponente) * aux.numero_[i]);
     }
   }
@@ -988,11 +1078,12 @@ BigInt<2>::operator BigInt<16UL>() {
   while (aux.numero_.size() % 4 != 0) {
     aux.numero_.emplace_back(0);
   }
-  int valor_digito{0}, exponente{0}; 
+  int valor_digito{0}, exponente{0};
   for (int i{0}; i < aux.numero_.size(); ++i) {
     valor_digito += (pow(2, exponente) * aux.numero_[i]);
     exponente++;
-    if (exponente == 4) { // Para pasar a hexadecimal se agrupa de 4 en 4 los bits y se resetea el exponente
+    if (exponente == 4) {  // Para pasar a hexadecimal se agrupa de 4 en 4 los
+                           // bits y se resetea el exponente
       switch (valor_digito) {
         case 10:
           numero_convertido_aux.push_back('A');
@@ -1020,10 +1111,12 @@ BigInt<2>::operator BigInt<16UL>() {
       exponente = 0;
     }
   }
-  std::reverse(numero_convertido_aux.begin(), numero_convertido_aux.end()); // Le damos la vuelta al string para que se guarde al revés en el vector de bool
+  std::reverse(
+      numero_convertido_aux.begin(),
+      numero_convertido_aux.end());  // Le damos la vuelta al string para que se
+                                     // guarde al revés en el vector de bool
   BigInt<16> numero_convertido{numero_convertido_aux};
   return numero_convertido;
 }
-
 
 #endif
