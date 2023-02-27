@@ -66,7 +66,7 @@ class BigInt {
   operator BigInt<U>() {
     std::string numero, residuos;
     BigInt<Base> aux{*this};
-    for (int i{aux.numero_.size() - 1}; i >= 0; --i) {
+    for (unsigned long i{aux.numero_.size() - 1}; i != -1; --i) {
       if (aux.numero_[i] >= 10) {
         numero.push_back(static_cast<char>('A' + numero_[i] - 10));
       } else {
@@ -125,7 +125,7 @@ BigInt<Base>::BigInt(std::string& numero_string) {
   } else {
     signo_ = -1;
   }
-  for (int i{numero_string.size() - 1}; i >= 0; --i) {
+  for (unsigned long i{numero_string.size() - 1}; i != -1; --i) {
     if (isalpha(numero_string[i])) {  // Comprobamos si el dígito es un caracter
                                       // para después comprobar si es un
                                       // caracter hexadecimal para hacer la
@@ -259,7 +259,7 @@ char BigInt<Base>::operator[](int posicion) const {
 
 template <size_t Base>
 std::ostream& operator<<(std::ostream& os, const BigInt<Base>& numero) {
-  for (int i{numero.numero_.size() - 1}; i >= 0; --i) {
+  for (unsigned long i{numero.numero_.size() - 1}; i != -1; --i) {
     if (numero.numero_[i] >=
         10) {  // Si el número es mayor o igual que 10 es que es una letra en
                // hexadecimal así que la convertimos a un número
@@ -751,7 +751,7 @@ BigInt<2>::BigInt(long long n) {
 }
 
 BigInt<2>::BigInt(std::string& numero) {
-  for (int i{numero.size() - 1}; i >= 0; --i) {
+  for (unsigned long i{numero.size() - 1}; i != -1; --i) {
     numero_.emplace_back(numero[i] - '0');
   }
 }
@@ -821,7 +821,7 @@ std::istream& operator>>(std::istream& is, BigInt<2>& numero) {
 }
 
 std::ostream& operator<<(std::ostream& os, const BigInt<2>& numero) {
-  for (int i{numero.numero_.size() - 1}; i >= 0; --i) {
+  for (unsigned long i{numero.numero_.size() - 1}; i != -1; --i) {
     os << numero.numero_[i];
   }
   return os;
@@ -907,7 +907,7 @@ BigInt<2> operator+(const BigInt<2>& numero1, const BigInt<2>& numero2) {
   // añadimos al final, pero si los dos números son positivos entonces si se
   // tiene que añadir el carry, por lo que comprobamos si los dos números son
   // positivos mirando si el primer bit de signo de los dos números es '0
-  if (aux_numero1.sign() == 0 && aux_numero2.sign() == 0 ||
+  if (numero1.sign() == 0 && numero2.sign() == 0 ||
       (aux_numero1.numero_.size() == 1 && aux_numero2.numero_.size() == 1)) {
       result.numero_.push_back(carry);
       // Al estar los números en C2, si un número empieza en 1 es que es negativo, 
@@ -993,7 +993,6 @@ BigInt<2> operator/(const BigInt<2>& numero1, const BigInt<2>& divisor) {
   // esto es así, el cociente de la división dará 0, por lo que retornamos un
   // BigInt con valor 0.
   if (numero1 < divisor) {
-    std::cout << "Entró\n";
     return BigInt<2>{};
   }
 
