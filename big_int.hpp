@@ -61,7 +61,7 @@ class BigInt {
   template <size_t Bass>
   friend BigInt<Bass> pow(const BigInt<Bass>&, const BigInt<Bass>&);
 
-  // Modificación: Pasar números de cualquier base a base 2
+  // Conversor de números de cualquier base a base 2
   template <size_t U>
   operator BigInt<U>() {
     std::string numero, residuos;
@@ -689,7 +689,7 @@ BigInt<Base> BigInt<Base>::operator--(int) {  // Post-decremento
 template <>
 class BigInt<2> {
  public:
-  // ========== CONSTRUCTORES ==========
+  // Constructores
   BigInt(long long n = 0);
   BigInt(std::string& numero);
   BigInt(const char* numero);
@@ -727,8 +727,7 @@ class BigInt<2> {
   BigInt<2> operator%(const BigInt<2>& numero2) const;
   // Potencia ab
   friend BigInt<2> pow(const BigInt<2>&, const BigInt<2>&);
-  // ==== CONVERSORES DE BINARIO A OTRAS BASES: ====
-  // Conversor de binario a octal:
+  // Conversores de Binario a otras bases
   operator BigInt<8>();
   operator BigInt<10>();
   operator BigInt<16>();
@@ -886,7 +885,7 @@ BigInt<2> operator+(const BigInt<2>& numero1, const BigInt<2>& numero2) {
       result;  // resultado como BigInt
 
   // Rellenando el número más corto con 0s
-  int diferencia{aux_numero1.numero_.size() - aux_numero2.numero_.size()};
+  auto diferencia{aux_numero1.numero_.size() - aux_numero2.numero_.size()};
   if (diferencia < 0) {  // numero1 es el menor de los dos
     for (int i{0}; i < -diferencia; ++i) {
       aux_numero1.numero_.push_back(0);
